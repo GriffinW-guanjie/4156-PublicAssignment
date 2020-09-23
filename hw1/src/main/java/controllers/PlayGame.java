@@ -1,9 +1,14 @@
 package controllers;
 
+import com.google.gson.Gson;
 import io.javalin.Javalin;
 import java.io.IOException;
 import java.util.Queue;
+import models.GameBoard;
+import models.Message;
 import org.eclipse.jetty.websocket.api.Session;
+
+
 
 class PlayGame {
 
@@ -11,11 +16,13 @@ class PlayGame {
 
   private static Javalin app;
 
+  
+
   /** Main method of the application.
    * @param args Command line arguments
    */
   public static void main(final String[] args) {
-
+    
     app = Javalin.create(config -> {
       config.addStaticFiles("/public");
     }).start(PORT_NUMBER);
@@ -24,27 +31,50 @@ class PlayGame {
     app.post("/echo", ctx -> {
       ctx.result(ctx.body());
     });
-
-    /**
-     * Please add your end points here.
-     * 
-     * 
-     * 
-     * 
-     * Please add your end points here.
-     * 
-     * 
-     * 
-     * 
-     * Please add your end points here.
-     * 
-     * 
-     * 
-     * 
-     * Please add your end points here.
-     * 
-     */
-
+    
+    app.get("/newgame", ctx -> {
+      ctx.result("http://" + ctx.host() + "/tictactoe.html");
+    });
+    
+    GameBoard gameBoard = new GameBoard();
+    
+    app.post("/startgame", ctx -> {
+      System.out.println(ctx.body());
+      Gson gson = new Gson();
+      gameBoard.setp1(ctx.body().charAt(ctx.body().length() - 1), 1);
+      System.out.println(gson.toJson(gameBoard));
+      sendGameBoardToAllPlayers(gson.toJson(gameBoard));
+      
+    });
+    
+    app.get("/joingame", ctx -> {
+      gameBoard.setp2(2);
+      gameBoard.setGameStarted(true);
+      gameBoard.setTurn(1);
+      Gson gson = new Gson();
+      ctx.result("http://" + ctx.host() + "/tictactoe.html?p=2");
+      System.out.println(gson.toJson(gameBoard));
+      sendGameBoardToAllPlayers(gson.toJson(gameBoard));
+    });
+    
+    app.post("/move/:playerId", ctx -> {
+      System.out.println(Integer.parseInt(ctx.pathParam("playerId")));
+      //System.out.println(ctx.body());
+      System.out.println(ctx.body().split("&")[0].split("=")[1]
+          + ctx.body().split("&")[1].split("=")[1]);
+      int x = Integer.parseInt(ctx.body().split("&")[0].split("=")[1]);
+      int y = Integer.parseInt(ctx.body().split("&")[1].split("=")[1]);
+      Gson gson = new Gson();
+      Message message = gameBoard.move(Integer.parseInt(ctx.pathParam("playerId")), x, y);
+      if (message.isMoveValidity()) {
+        sendGameBoardToAllPlayers(gson.toJson(gameBoard));
+      }
+      ctx.result(gson.toJson(message));
+      if (message.getCode() != 100) {
+        gameBoard.clearBoard();
+      }
+    });
+    
     // Web sockets - DO NOT DELETE or CHANGE
     app.ws("/gameboard", new UiWebSocket());
   }
