@@ -102,7 +102,10 @@ public class GameBoard {
     return boardState;
   }
   
-
+  /**
+   *enumerate all the possible condition of winning.
+   */
+  
   private boolean checkWin() {
     if ((boardState[0][0] == boardState[0][1]) && (boardState[0][1] == boardState[0][2])
          && (boardState[0][0] != 0)
@@ -140,7 +143,7 @@ public class GameBoard {
   /**
    * public method to make a move.
    * 
-   * @param id playerid
+   * @param id player id
    * @param x x coordinate
    * @param y y coordinate
    * @return the message
@@ -170,7 +173,6 @@ public class GameBoard {
         message.setMoveValidity(true);
         message.setMessage("Draw");
         message.setCode(300);
-        //gameStarted = false;
       } else {
         message.setMoveValidity(true);
         message.setCode(100);

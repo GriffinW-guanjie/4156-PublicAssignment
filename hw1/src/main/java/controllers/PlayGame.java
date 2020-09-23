@@ -32,11 +32,16 @@ class PlayGame {
       ctx.result(ctx.body());
     });
     
+    // Get the path to game.
     app.get("/newgame", ctx -> {
       ctx.result("http://" + ctx.host() + "/tictactoe.html");
     });
     
     GameBoard gameBoard = new GameBoard();
+    
+    
+    //initialize the game board.
+     
     
     app.post("/startgame", ctx -> {
       System.out.println(ctx.body());
@@ -47,6 +52,10 @@ class PlayGame {
       
     });
     
+    
+    //set the board ready to play.
+    
+    
     app.get("/joingame", ctx -> {
       gameBoard.setp2(2);
       gameBoard.setGameStarted(true);
@@ -56,6 +65,10 @@ class PlayGame {
       System.out.println(gson.toJson(gameBoard));
       sendGameBoardToAllPlayers(gson.toJson(gameBoard));
     });
+    
+    
+    // set the board ready to play.
+     
     
     app.post("/move/:playerId", ctx -> {
       System.out.println(Integer.parseInt(ctx.pathParam("playerId")));
