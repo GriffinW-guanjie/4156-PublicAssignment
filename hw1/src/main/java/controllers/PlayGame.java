@@ -10,7 +10,7 @@ import org.eclipse.jetty.websocket.api.Session;
 
 
 
-class PlayGame {
+public class PlayGame {
 
   private static final int PORT_NUMBER = 8080;
 
@@ -22,6 +22,7 @@ class PlayGame {
    * @param args Command line arguments
    */
   public static void main(final String[] args) {
+    GameBoard gameBoard = new GameBoard();
     
     app = Javalin.create(config -> {
       config.addStaticFiles("/public");
@@ -35,9 +36,10 @@ class PlayGame {
     // Get the path to game.
     app.get("/newgame", ctx -> {
       ctx.result("http://" + ctx.host() + "/tictactoe.html");
+      gameBoard.clearBoard();
     });
     
-    GameBoard gameBoard = new GameBoard();
+
     
     
     //initialize the game board.
@@ -45,10 +47,14 @@ class PlayGame {
     
     app.post("/startgame", ctx -> {
       System.out.println(ctx.body());
-      Gson gson = new Gson();
+      gameBoard.clearBoard();
       gameBoard.setp1(ctx.body().charAt(ctx.body().length() - 1), 1);
+      System.out.println("gamestarted--");
+      Gson gson = new Gson();
       System.out.println(gson.toJson(gameBoard));
+      System.out.println("gamestarted---");
       sendGameBoardToAllPlayers(gson.toJson(gameBoard));
+      ctx.result(gson.toJson(gameBoard));
       
     });
     
@@ -58,8 +64,7 @@ class PlayGame {
     
     app.get("/joingame", ctx -> {
       gameBoard.setp2(2);
-      gameBoard.setGameStarted(true);
-      gameBoard.setTurn(1);
+      gameBoard.startGame();
       Gson gson = new Gson();
       ctx.result("http://" + ctx.host() + "/tictactoe.html?p=2");
       System.out.println(gson.toJson(gameBoard));
@@ -83,7 +88,8 @@ class PlayGame {
         sendGameBoardToAllPlayers(gson.toJson(gameBoard));
       }
       ctx.result(gson.toJson(message));
-      if (message.getCode() != 100) {
+      //ctx.result(gson.toJson(gameBoard));
+      if (message.getCode() == 200 || message.getCode() == 300) {
         gameBoard.clearBoard();
       }
     });

@@ -57,6 +57,11 @@ public class GameBoard {
     }
 
   }
+  
+  public void startGame() {
+    this.setTurn(1);
+    this.setGameStarted(true);
+  }
 
   public boolean isGameStarted() {
     return gameStarted;
@@ -154,12 +159,15 @@ public class GameBoard {
     if (!gameStarted) {
       message.setMoveValidity(false);
       message.setMessage("Game not started");
+      message.setCode(401);
     } else if (id != turn) {
       message.setMoveValidity(false);
       message.setMessage("Not your turn");
+      message.setCode(402);
     } else if (boardState[x][y] != 0) {
       message.setMoveValidity(false);
       message.setMessage("This square is already taken");
+      message.setCode(403);
     } else {
       boardState[x][y] = id == 1 ? p1.getType() : p2.getType();
       turn = 3 - turn;
